@@ -1,5 +1,7 @@
 package com.springboot.cloud.sysadmin.organization.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.springboot.cloud.sysadmin.organization.entity.param.ResourceQueryParam;
 import com.springboot.cloud.sysadmin.organization.entity.po.Resource;
 
@@ -12,7 +14,7 @@ public interface IResourceService {
      * @param id
      * @return
      */
-    Resource get(long id);
+    Resource get(String id);
 
     /**
      * 新增资源
@@ -20,14 +22,21 @@ public interface IResourceService {
      * @param resource
      * @return
      */
-    long add(Resource resource);
+    boolean add(Resource resource);
 
     /**
-     * 查询资源
+     * 查询资源,分页
      *
      * @return
      */
-    List<Resource> query(ResourceQueryParam resourceQueryParam);
+    IPage<Resource> query(Page page, ResourceQueryParam resourceQueryParam);
+
+    /**
+     * 查询所有资源
+     *
+     * @return
+     */
+    List<Resource> getAll();
 
     /**
      * 根据username查询角色拥有的资源
@@ -41,12 +50,12 @@ public interface IResourceService {
      *
      * @param resource
      */
-    void update(Resource resource);
+    boolean update(Resource resource);
 
     /**
      * 根据id删除资源
      *
      * @param id
      */
-    void delete(long id);
+    boolean delete(String id);
 }

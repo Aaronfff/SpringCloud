@@ -14,7 +14,14 @@ public interface IRoleService {
      * @param id
      * @return
      */
-    Role get(long id);
+    Role get(String id);
+
+    /**
+     * 获取所有角色
+     *
+     * @return
+     */
+    List<Role> getAll();
 
     /**
      * 新增角色
@@ -22,7 +29,7 @@ public interface IRoleService {
      * @param role
      * @return
      */
-    long add(Role role);
+    boolean add(Role role);
 
     /**
      * 查询角色
@@ -36,19 +43,19 @@ public interface IRoleService {
      *
      * @return
      */
-    List<Role> query(long userId);
+    List<Role> query(String userId);
 
     /**
      * 更新角色信息
      *
      * @param role
      */
-    void update(Role role);
+    boolean update(Role role);
 
     /**
      * 根据id删除角色
      *
      * @param id
      */
-    void delete(long id);
+    boolean delete(String id);
 }

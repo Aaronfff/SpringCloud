@@ -3,10 +3,12 @@ package com.springboot.auth.authorization.provider;
 import com.springboot.auth.authorization.entity.Role;
 import com.springboot.auth.authorization.entity.User;
 import com.springboot.cloud.common.core.entity.vo.Result;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class OrganizationProviderFallback implements OrganizationProvider {
 
     @Override
@@ -15,7 +17,7 @@ public class OrganizationProviderFallback implements OrganizationProvider {
     }
 
     @Override
-    public Result<Set<Role>> queryRolesByUserId(long userId) {
+    public Result<Set<Role>> queryRolesByUserId(String userId) {
         return Result.success(new HashSet<Role>());
     }
 }

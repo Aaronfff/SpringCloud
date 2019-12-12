@@ -12,7 +12,7 @@ public interface IPositionService {
      * @param id
      * @return
      */
-    Position get(long id);
+    Position get(String id);
 
     /**
      * 新增职位
@@ -20,7 +20,7 @@ public interface IPositionService {
      * @param position
      * @return
      */
-    long add(Position position);
+    boolean add(Position position);
 
     /**
      * 查询职位
@@ -34,12 +34,12 @@ public interface IPositionService {
      *
      * @param position
      */
-    void update(Position position);
+    boolean update(Position position);
 
     /**
      * 根据id删除职位
      *
      * @param id
      */
-    void delete(long id);
+    boolean delete(String id);
 }

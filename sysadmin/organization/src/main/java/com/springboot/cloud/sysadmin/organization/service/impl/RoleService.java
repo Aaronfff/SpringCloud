@@ -1,69 +1,88 @@
 package com.springboot.cloud.sysadmin.organization.service.impl;
 
+import com.alicp.jetcache.anno.CacheInvalidate;
+import com.alicp.jetcache.anno.CacheType;
+import com.alicp.jetcache.anno.Cached;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.springboot.cloud.sysadmin.organization.dao.RoleMapper;
-import com.springboot.cloud.sysadmin.organization.dao.UserRoleMapper;
 import com.springboot.cloud.sysadmin.organization.entity.param.RoleQueryParam;
 import com.springboot.cloud.sysadmin.organization.entity.po.Role;
-import com.springboot.cloud.sysadmin.organization.entity.po.UserRole;
+import com.springboot.cloud.sysadmin.organization.exception.RoleNotFoundException;
+import com.springboot.cloud.sysadmin.organization.service.IRoleResourceService;
 import com.springboot.cloud.sysadmin.organization.service.IRoleService;
+import com.springboot.cloud.sysadmin.organization.service.IUserRoleService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.Set;
 
 @Service
 @Slf4j
-public class RoleService implements IRoleService {
+public class RoleService extends ServiceImpl<RoleMapper, Role> implements IRoleService {
 
     @Autowired
-    private RoleMapper roleMapper;
+    private IUserRoleService userRoleService;
 
     @Autowired
-    private UserRoleMapper userRoleMapper;
+    private IRoleResourceService roleResourceService;
 
     @Override
-    public long add(Role role) {
-        return roleMapper.insert(role);
+    public boolean add(Role role) {
+        boolean isSuccess = this.save(role);
+        roleResourceService.saveBatch(role.getId(), role.getResourceIds());
+        return isSuccess;
     }
 
     @Override
-    @CacheEvict(value = "role", key = "#root.targetClass.name+'-'+#id")
-    public void delete(long id) {
-        roleMapper.deleteById(id);
+    @CacheInvalidate(name = "role::", key = "#id")
+    public boolean delete(String id) {
+        roleResourceService.removeByRoleId(id);
+        return this.removeById(id);
     }
 
     @Override
-    @CacheEvict(value = "role", key = "#root.targetClass.name+'-'+#role.id")
-    public void update(Role role) {
-        roleMapper.updateById(role);
+    @CacheInvalidate(name = "role::", key = "#role.id")
+    public boolean update(Role role) {
+        boolean isSuccess = this.updateById(role);
+        roleResourceService.saveBatch(role.getId(), role.getResourceIds());
+        return isSuccess;
     }
 
     @Override
-    @Cacheable(value = "role", key = "#root.targetClass.name+'-'+#id")
-    public Role get(long id) {
-        return roleMapper.selectById(id);
+    @Cached(name = "role::", key = "#id", cacheType = CacheType.BOTH)
+    public Role get(String id) {
+        Role role = this.getById(id);
+        if (Objects.isNull(role)) {
+            throw new RoleNotFoundException("role not found with id:" + id);
+        }
+        role.setResourceIds(roleResourceService.queryByRoleId(id));
+        return role;
     }
 
     @Override
-    public List<Role> query(long userId) {
-        List<UserRole> userRoles = userRoleMapper.selectList(new QueryWrapper<UserRole>().eq("user_id", userId));
-        return roleMapper.selectBatchIds(userRoles.stream().map(userRole -> userRole.getRoleId()).collect(Collectors.toList()));
+    public List<Role> getAll() {
+        return this.list();
+    }
+
+    @Override
+    @Cached(name = "role4user::", key = "#userId", cacheType = CacheType.BOTH)
+    public List<Role> query(String userId) {
+        Set<String> roleIds = userRoleService.queryByUserId(userId);
+        return (List<Role>) this.listByIds(roleIds);
     }
 
     @Override
     public IPage<Role> query(Page page, RoleQueryParam roleQueryParam) {
-        QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Role> queryWrapper = roleQueryParam.build();
         queryWrapper.eq(StringUtils.isNotBlank(roleQueryParam.getName()), "name", roleQueryParam.getName());
         queryWrapper.eq(StringUtils.isNotBlank(roleQueryParam.getCode()), "code", roleQueryParam.getCode());
-        return roleMapper.selectPage(page, queryWrapper);
+        return this.page(page, queryWrapper);
     }
-
 }
