@@ -8,6 +8,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                sh 'cd /home/github/SpringCloud'
                 sh 'install.sh'
             }
         }
