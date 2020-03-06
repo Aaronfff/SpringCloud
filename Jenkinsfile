@@ -10,7 +10,7 @@ pipeline {
             steps {
                 sh 'echo "hello world"'
                 sh 'cd /home/github/SpringCloud'
-                sh 'install.sh'
+                sh './install.sh'
             }
         }
     }
