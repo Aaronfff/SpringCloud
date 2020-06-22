@@ -52,7 +52,7 @@ services:
       - ../sysadmin/db:/sql/sysadmin
       - ./init-db.sh:/init-db.sh
     environment:
-      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_ROOT_PASSWORD: root123
 
 networks:
   sc-net:
