@@ -7,7 +7,8 @@ services:
     volumes:
       - ../data/redis:/data
     environment:
-      - REDIS_PASSWORD=123456
+      - REDIS_PASSWORD=NJQW9m1YAxzgBl4Z
+      - requirepass=NJQW9m1YAxzgBl4X
     networks:
       - sc-net
     ports:
